@@ -41,7 +41,7 @@ window.addEventListener('resize', () =>
 // Base camera
 const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 100)
 camera.position.x = 1
-camera.position.y = 1.5
+camera.position.y = 2
 camera.position.z = 1
 scene.add(camera)
 
@@ -49,25 +49,38 @@ scene.add(camera)
 const controls = new OrbitControls(camera, canvas)
 controls.enableDamping = true
 
+// Lights
+const lights = {}
+
+lights.items = {}
+
+lights.items.color = '#ffffff'
+
+lights.items.instance = new THREE.PointLight(lights.items.color)
+lights.items.instance.position.set(10, 10, - 10)
+lights.items.instance.shadow.camera.top = 1
+lights.items.instance.shadow.camera.bottom = 1
+lights.items.instance.castShadow = true
+scene.add(lights.items.instance)
+
 /**
  * Faces
  */
 const faces = {}
 
-// Geometry
-faces.geometry = new THREE.PlaneGeometry(100, 100)
+faces.geometry = new THREE.PlaneGeometry(40, 40)
+faces.geometry.rotateX(- Math.PI * 0.5)
 
-faces.material = new THREE.MeshPhongMaterial({
+faces.material = new THREE.MeshStandardMaterial({
     color: '#999999',
-    depthWrite: false
+    depthWrite: false,
+    roughness: 1
 })
 
 faces.mesh = new THREE.Mesh(faces.geometry, faces.material)
+faces.mesh.position.y = - 0.20
+faces.mesh.receiveShadow = true
 scene.add(faces.mesh)
-
-faces.light = new THREE.DirectionalLight('#ffffff', 1)
-faces.light.position.set(6, 6, 6)
-scene.add(faces.light)
 
 faces.model = new GLTFLoader()
 faces.model.load('scene.gltf', (gltf) => {
@@ -75,8 +88,15 @@ faces.model.load('scene.gltf', (gltf) => {
     faceModel.rotateZ(Math.PI * 0.5)
     faceModel.scale.set(2, 2, 2)
     scene.add(faceModel)
-})
 
+    faceModel.traverse((_child) => 
+    {
+        if(_child instanceof THREE.Mesh)
+        {
+            _child.castShadow = true
+        }
+    })
+})
 
 /**
  * Renderer
@@ -86,6 +106,9 @@ const renderer = new THREE.WebGLRenderer({
     antialias: true,
 })
 
+renderer.shadowMap.enabled = true
+renderer.physicallyCorrectLights = true
+renderer.shadowMap.type = THREE.PCFSoftShadowMap
 renderer.outputEncoding = THREE.sRGBEncoding
 renderer.setSize(sizes.width, sizes.height)
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))

@@ -54,12 +54,10 @@ const lights = {}
 
 lights.items = {}
 
-lights.items.color = '#ffffff'
+lights.items.color = '#ffd500'
 
 lights.items.instance = new THREE.PointLight(lights.items.color)
 lights.items.instance.position.set(10, 10, - 10)
-lights.items.instance.shadow.camera.top = 1
-lights.items.instance.shadow.camera.bottom = 1
 lights.items.instance.castShadow = true
 scene.add(lights.items.instance)
 
